@@ -1,0 +1,9 @@
+# Exclude linter data and configuration
+.mypy_cache
+pyrightconfig.json
+
+# Exclude Virtual Environment
+.venv/
+
+# Exclude contents of data folder
+data/
