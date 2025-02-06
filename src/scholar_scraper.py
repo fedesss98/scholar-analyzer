@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 import argparse
 import json
-
+from pathlib import Path
 
 parser = argparse.ArgumentParser(
     prog="Google Scholar Scraper",
@@ -84,7 +84,12 @@ def main(q:str, p:int):
                 )
                 data.append(paper_data)
     
-    with open(f"./data/results_{q.replace(' ', '_')}.json", "w+") as f:
+    output_folder = Path("./data")
+
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True, exist_ok=True)
+
+    with open(output_folder / f"results_{q.replace(' ', '_')}.json", "w+") as f:
         json.dump(data, f, ensure_ascii=True, indent=4)
 
     return None
