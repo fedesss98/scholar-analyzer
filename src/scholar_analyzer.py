@@ -5,7 +5,6 @@ Created by Federico Amato - 2025/02.
 
 This program reads metadata from a Google Scholar's reserach query and display some statistics
 """
-import json
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
