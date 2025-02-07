@@ -7,3 +7,6 @@ pyrightconfig.json
 
 # Exclude contents of data folder
 data/
+
+# Exclude Jupyter Notebooks
+.ipynb

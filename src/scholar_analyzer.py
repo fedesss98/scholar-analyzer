@@ -17,11 +17,29 @@ parser.add_argument("query", type=str, help="Query to look for in the data folde
 
 
 def plot_distribution(data):
-    fig, ax = plt.subplots(figsize=(8, 6), tight_layout=True)
+    fig, ax = plt.subplots(figsize=(10, 4), tight_layout=True)
 
     ax.hist(data["date"])
     ax.set_title("Number of pubblications per year")
 
+    return fig
+
+
+def plot_trend(data, title, agg="count"):
+    if agg == "count":
+        xy = data.groupby("date").count()
+    elif agg == "sum":
+        xy = data.groupby("date").sum()
+
+    x = [int(i) for i in xy.index]
+    y = xy.values.flatten()
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(x, y, linewidth=0.1)
+
+    ax.set_title(title)
+    
+    plt.show()
     return fig
 
 
@@ -35,7 +53,12 @@ def main(q):
     else:
         df = pd.read_json(input_file)
 
+    # Correct dates
+    df["date"] = df.date.apply(lambda x: int(x) if x.strip().isnumeric() else None)
+
     # Plot Distribution of pubblications by data
+    plot_trend(df[["date", "title"]], "Number of pubblications per year")
+    plot_trend(df[["date", "citations"]], "Number of citations per year", "sum")
     plot_distribution(df)
     plt.show()
 
