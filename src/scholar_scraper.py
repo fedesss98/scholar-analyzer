@@ -39,26 +39,70 @@ def split_greenbar(bar:str):
     return authors, journal, date, publisher
 
 
+def get_summary(div) -> str:
+    summary = div.text.replace("\u2026", "").replace("\n", "")
+    return summary
+
+
+def get_link(div) -> str:
+    try:
+        link = div.h3.a["href"]
+    except TypeError as e:
+        print(f"Error in paper {div.h3.text}: {e}")
+        link = ""
+
+    return link
+
+
+def get_citations(div) -> int:
+    cit = div.find("div", "gs_fl").find_all("a")[2].text.split()[-1]
+    if cit.isnumeric():
+        return cit
+    else:
+        return None
+
+
 def main(q:str, p:int):
     
-    data = []
     headers = {
         'user-agent': 
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
 
-    # Iterate over the specified number of pages
-    for page in range(p): 
+    # Optionally create data folder if not already present
+    output_folder = Path("./data")
 
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True, exist_ok=True)
+
+    output_file = output_folder / f"results_{q.replace(' ', '_')}.json"
+    # Lookup if there are already data for that query
+    try:
+        with open(output_file, "r") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = []
+        p0 = 0
+    else:
+        # Last saved page
+        last_page = int(data[-1]["result"]/10)
+        # Starting page
+        p0 = last_page + 1
+        print(f"Resuming from page {p0}")
+
+    # Iterate over the specified number of pages
+    for page in range(p0, p0 + p): 
+        
         # Built the GET request
         request_params = {
-            "hl": "it",
+            "hl": "it",  # preferred language
+            "as_vis": 1,  # this filter out citations of papers
             "q": f'\"{q.replace(" ", "+")}\"',
             "start": 10 * page,
         }
         url = "https://scholar.google.com/scholar"
         # Make the request
         r = requests.get(url, request_params, headers=headers)
-        print(r.url)
+        
         # Parse the request
         soup = BeautifulSoup(r.text, "lxml")
         # Check - print the first title of the page
@@ -70,26 +114,23 @@ def main(q:str, p:int):
             for i, div in enumerate(soup.find_all("div", class_="gs_ri")):
                 green_bar:str = div.find("div", "gs_a").text
                 authors, journal, date, publisher = split_greenbar(green_bar)
+                link = get_link(div)
+                citations = get_citations(div)
 
                 paper_data = dict(
                     title = div.h3.text,
-                    link = div.h3.a["href"],
+                    link = link,
                     authors = authors,
                     journal = journal,
                     date = date,
                     publisher = publisher,
-                    summary = div.find("div", "gs_rs").text,
-                    citations = div.find("div", "gs_fl").find_all("a")[2].text.split()[-1],
+                    summary = get_summary(div.find("div", "gs_rs")),
+                    citations = citations,
                     result = 10 * page + i
                 )
                 data.append(paper_data)
     
-    output_folder = Path("./data")
-
-    if not output_folder.exists():
-        output_folder.mkdir(parents=True, exist_ok=True)
-
-    with open(output_folder / f"results_{q.replace(' ', '_')}.json", "w+") as f:
+    with open(output_file, "w+") as f:
         json.dump(data, f, ensure_ascii=True, indent=4)
 
     return None
