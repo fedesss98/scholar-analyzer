@@ -79,7 +79,7 @@ def main(q:str, p:int):
                     date = date,
                     publisher = publisher,
                     summary = div.find("div", "gs_rs").text,
-                    citations = div.find_all("a")[2].text.split()[-1],
+                    citations = div.find("div", "gs_fl").find_all("a")[2].text.split()[-1],
                     result = 10 * page + i
                 )
                 data.append(paper_data)
