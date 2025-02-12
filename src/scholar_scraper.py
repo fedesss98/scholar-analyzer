@@ -62,20 +62,20 @@ def get_citations(div) -> int:
         return None
 
 
-def save(data, folder, q):
+def save(data, folder, filename):
     
-    output_json = folder / f"results_{q.replace(' ', '_')}.json"
-    output_csv = folder / f"results_{q.replace(' ', '_')}.csv"
-
-    json_string = json.dumps(data)
+    output_json = folder / f"{filename}.json"
+    output_csv = folder / f"{filename}.csv"
 
     # Save JSON
     with open(output_json, "w+") as f:
         json.dump(data, f, ensure_ascii=True, indent=4)
 
-    df = pd.read_json(json_string)
+    df = pd.DataFrame(data)
     # Save CSV
     df.to_csv(output_csv, index=False, sep=';')
+    
+    return None
 
 
 def main(q:str, p:int):
@@ -86,13 +86,13 @@ def main(q:str, p:int):
 
     # Optionally create data folder if not already present
     output_folder = Path("./data")
-
+    filename = f"results_{q.replace(' ', '_')}"
     if not output_folder.exists():
         output_folder.mkdir(parents=True, exist_ok=True)
 
     # Lookup if there are already data for that query
     try:
-        with open(output_file, "r") as f:
+        with open(output_folder / f"{filename}.json", "r") as f:
             data = json.load(f)
     except FileNotFoundError:
         data = []
@@ -146,7 +146,7 @@ def main(q:str, p:int):
                 data.append(paper_data)
     
     # Save data to JSON and CSV
-    save(data, output_folder, q)
+    save(data, output_folder, filename)
 
     return None
 
