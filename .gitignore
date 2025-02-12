@@ -9,4 +9,5 @@ pyrightconfig.json
 data/
 
 # Exclude Jupyter Notebooks
-.ipynb
+*.ipynb
+.ipynb_checkpoints
