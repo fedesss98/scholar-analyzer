@@ -25,7 +25,7 @@ def main(q):
     # Read JSON file
     df = pd.read_json(filename)
     # Save CSV file
-    df.to_csv(data_folder / f"{q.replace(' ', '_')}.csv", index=False)
+    df.to_csv(data_folder / f"{q.replace(' ', '_')}.csv", index=False, sep=";")
 
     return None
 

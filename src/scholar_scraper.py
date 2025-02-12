@@ -62,6 +62,22 @@ def get_citations(div) -> int:
         return None
 
 
+def save(data, folder, q):
+    
+    output_json = folder / f"results_{q.replace(' ', '_')}.json"
+    output_csv = folder / f"results_{q.replace(' ', '_')}.csv"
+
+    json_string = json.dumps(data)
+
+    # Save JSON
+    with open(output_json, "w+") as f:
+        json.dump(data, f, ensure_ascii=True, indent=4)
+
+    df = pd.read_json(json_string)
+    # Save CSV
+    df.to_csv(output_csv, index=False, sep=';')
+
+
 def main(q:str, p:int):
     
     headers = {
@@ -74,7 +90,6 @@ def main(q:str, p:int):
     if not output_folder.exists():
         output_folder.mkdir(parents=True, exist_ok=True)
 
-    output_file = output_folder / f"results_{q.replace(' ', '_')}.json"
     # Lookup if there are already data for that query
     try:
         with open(output_file, "r") as f:
@@ -130,10 +145,11 @@ def main(q:str, p:int):
                 )
                 data.append(paper_data)
     
-    with open(output_file, "w+") as f:
-        json.dump(data, f, ensure_ascii=True, indent=4)
+    # Save data to JSON and CSV
+    save(data, output_folder, q)
 
     return None
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
