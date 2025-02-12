@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(
         "found on the engine up to a certain number of pages.\n" \
         "Specify the research query and optionally the number of pages with the -p parameter.\n", 
 )
-parser.add_argument("query", help="Research Query for Google Scholar")
+parser.add_argument("query", type=str, help="Research Query for Google Scholar")
 
 
 def main(q):
@@ -25,7 +25,7 @@ def main(q):
     # Read JSON file
     df = pd.read_json(filename)
     # Save CSV file
-    df.to_csv(data_folder / f"{q.replace(' ', '_')}.csv")
+    df.to_csv(data_folder / f"{q.replace(' ', '_')}.csv", index=False)
 
     return None
 
